@@ -1,0 +1,115 @@
+
+; You may customize this and other start-up templates; 
+; The location of this template is c:\emu8086\inc\0_com_template.txt
+
+org 100h
+
+.data
+    nilai db "Masukan Nilai (1-9): $"
+    con db "heb$"
+    
+.code
+    mov ax, @data
+    mov ds, ax
+    
+    main:
+        mov dx, offset nilai
+        mov ah, 09h
+        int 21h
+        
+        inputan:
+            mov ax, 0
+            int 16h
+            
+            cmp al, 0dh
+            je inputfinish
+            
+            mov dl, al
+            mov ah, 02h
+            int 21h
+            
+            sub al, 30h
+            mov bl, al
+            jmp inputan
+            
+         inputfinish:
+            mov ah, 02h
+            mov dl, 0dh
+            int 21h
+            
+            mov dl, 0ah
+            int 21h
+            
+            mov bh, 1
+            
+            naik:
+                cmp bh, bl
+                jg turunmulai
+                call cetakbaris
+                add bh, 2
+                jmp naik
+                
+             turunmulai:
+                sub bh, 4
+                
+             turun:
+                cmp bh, 1
+                jl selesai
+                call cetakbaris
+                sub bh, 2
+                jmp turun
+                
+             selesai:
+                ret
+                
+                cetakbaris:
+                    push ax
+                    push cx
+                    push dx
+                    
+                    mov cx, 0
+                    mov cl, bl
+                    sub cl, bh
+                    cmp cx, 0
+                    je mulaiangka
+                    
+                 cetakspasi:
+                    mov dl, 20h
+                    mov ah, 02h
+                    int 21h
+                    loop cetakspasi
+                    
+                 mulaiangka:
+                    mov cx, 0
+                    mov cl, bh
+                    mov dh, 1
+                    
+                 cetakangka:
+                    mov dl, dh
+                    add dl, 30h
+                    mov ah, 02h
+                    int 21h
+                    
+                    mov dl, 20h
+                    int 21h
+                    
+                    inc dh
+                    loop cetakangka
+                    
+                    mov dl, 0dh
+                    int 21h
+                    
+                    mov dl, 0ah
+                    int 21h
+                    
+                    pop ax
+                    pop cx
+                    pop dx
+                    
+                       
+
+ret
+
+
+
+
