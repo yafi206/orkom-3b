@@ -84,4 +84,4 @@ org 100h                 ; Awal program (format COM)
 
         ret
 
-    main endp
+
