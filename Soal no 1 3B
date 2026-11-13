@@ -1,0 +1,87 @@
+org 100h                 ; Awal program (format COM)
+
+.data
+    pesanInput db "Masukan nilai N (1-9) : $"   ; Teks prompt
+
+.code
+    mov ax, @data        ; Mengambil alamat segmen data ke AX
+    mov ds, ax           ; Memasukkan alamat data ke DS
+
+    main proc
+
+        ; ===== INPUT =====
+
+        mov dx, offset pesanInput
+        mov ah, 09h               ; Output string
+        int 21h
+
+        handleInput:
+            mov ax, 0
+            int 16h               ; Baca tombol, AL = karakter
+
+            cmp al, 0dh           ; Enter?
+            je inputFinish
+
+            mov dl, al            ; Tampilkan karakter yang diketik
+            mov ah, 02h
+            int 21h
+
+            sub al, 30h           ; ASCII -> angka
+            mov bl, al            ; BL = N
+
+            jmp handleInput
+
+        inputFinish:
+
+            ; ===== PINDAH BARIS =====
+
+            mov ah, 02h
+            mov dl, 0dh           ; Carriage Return
+            int 21h
+            mov dl, 0ah           ; Line Feed
+            int 21h
+
+            ; ===== PERSIAPAN LOOP BARIS =====
+
+            mov cx, 0
+            mov cl, bl            ; CX = N (jumlah baris)
+            mov bh, 1             ; BH = nomor baris, mulai 1
+
+        ulangBaris:
+            push cx               ; Simpan counter baris ke stack
+
+            ; ===== PERSIAPAN LOOP KOLOM =====
+
+            mov cx, 0
+            mov cl, bh            ; CX = jumlah kolom = nomor baris
+            mov dh, 1             ; DH = nomor kolom, mulai 1
+
+        ulangKolom:
+            mov dl, dh            ; DL = nomor kolom
+            add dl, 30h           ; Angka -> ASCII
+            mov ah, 02h
+            int 21h               ; Cetak angka
+
+            mov dl, 20h           ; Spasi
+            mov ah, 02h
+            int 21h
+
+            inc dh                ; Kolom berikutnya
+            loop ulangKolom       ; CX - 1, ulangi jika belum 0
+
+            ; ===== PINDAH BARIS =====
+
+            mov ah, 02h
+            mov dl, 0dh
+            int 21h
+            mov dl, 0ah
+            int 21h
+
+            inc bh                ; Baris berikutnya
+
+            pop cx                ; Ambil kembali counter baris
+            loop ulangBaris       ; CX - 1, ulangi jika belum 0
+
+        ret
+
+    main endp
